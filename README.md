@@ -15,7 +15,7 @@ After completing these steps, the root folder should contain a `global_pose.csv`
 The path to the root folder can be passed to the `mulran2bag`-Node:
 
 ```console
-rosrun mulran2bag mulran2bag path/to/ROOT
+rosrun mulran2bag mulran2bag path/to/mulran/root/folder
 ```
 to convert it to a bag-file named `out.bag`.
 
