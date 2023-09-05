@@ -41,6 +41,8 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/Imu.h>
+#include <sensor_msgs/MagneticField.h>
+#include <sensor_msgs/NavSatFix.h>
 
 
 
@@ -111,8 +113,15 @@ int main(int argc, char** argv)
     std::string ouster_topic = "os1_points";
     std::string ouster_frame = "ouster";
 
-    std::string radar_frame = "radar_polar";
-    std::string radar_topic = "Navtech/Polar";
+    std::string navtech_frame = "radar_polar";
+    std::string navtech_topic = "Navtech/Polar";
+
+    std::string xsens_frame = "imu";
+    std::string xsens_topic = "imu/data_raw";
+    std::string xsens_mag_topic = "imu/mag";
+
+    std::string gps_frame = "gps";
+    std::string gps_topic = "gps/fix";
     
     std::string tf_static_topic = "tf_static";
     std::string tf_topic = "tf";
@@ -122,14 +131,15 @@ int main(int argc, char** argv)
 
     int stage = 1;
 
+    bool disable_warnings = true;
 
     // FOR DEBUGGING
-    bool add_ouster = false;
-    bool add_radar = false;
+    bool add_ouster = true;
+    bool add_radar = true;
     bool add_imu = true;
     bool add_gps = true;
-    bool add_dynamic_tf = false;
-    bool add_static_tf = false;
+    bool add_dynamic_tf = true;
+    bool add_static_tf = true;
 
 
     if(argc < 2)
@@ -169,7 +179,7 @@ int main(int argc, char** argv)
         }
         fin.close();
         
-        std::cout << "- Loaded " << stamps.size() << " Ouster stamps" << std::endl;
+        std::cout << "- loaded " << stamps.size() << " Ouster stamps" << std::endl;
 
         long count = 0;
         for(auto stamp : stamps)
@@ -180,7 +190,11 @@ int main(int argc, char** argv)
             const bfs::path ouster_data_path = mulran_root / "sensor_data" / "Ouster" / ss.str();
             if(!bfs::exists(ouster_data_path))
             {
-                std::cout << "Cloud " << ouster_data_path << " doesnt exist! Skipping." << std::endl;
+                if(!disable_warnings)
+                {
+                    std::cout << "WARN: Cloud " << ouster_data_path << " doesnt exist! Skipping." << std::endl;
+                }
+                
                 continue;
             }
 
@@ -225,7 +239,7 @@ int main(int argc, char** argv)
 
             double progress = static_cast<double>(count) / static_cast<double>(stamps.size());
 
-            printProgress("- added ouster clouds: ", progress);
+            printProgress("- added ouster clouds", progress);
         }
         std::cout << std::endl;
     
@@ -251,8 +265,9 @@ int main(int argc, char** argv)
             }
         }
 
-        std::cout << " - Loaded " << stamps.size() << " radar stamps" << std::endl;
+        std::cout << "- loaded " << stamps.size() << " Navtech stamps" << std::endl;
 
+        long count = 0;
         for(auto stamp : stamps)
         {
             std::stringstream ss;
@@ -263,16 +278,23 @@ int main(int argc, char** argv)
 
             cv_bridge::CvImage radarpolar_out_msg;
             radarpolar_out_msg.header.stamp.fromNSec(stamp);
-            radarpolar_out_msg.header.frame_id = radar_frame;
+            radarpolar_out_msg.header.frame_id = navtech_frame;
             radarpolar_out_msg.encoding = sensor_msgs::image_encodings::MONO8;
             radarpolar_out_msg.image    = radarpolar_image;
             auto msg = radarpolar_out_msg.toImageMsg();
-            bag.write(radar_topic, msg->header.stamp, *msg);
+            bag.write(navtech_topic, msg->header.stamp, *msg);
             if(radarpolar_out_msg.header.stamp < tf_static_stamp)
             {
                 tf_static_stamp = radarpolar_out_msg.header.stamp;
             }
+
+            count++;
+
+            double progress = static_cast<double>(count) / static_cast<double>(stamps.size());
+
+            printProgress("- add radar polar image", progress);
         }
+        std::cout << std:endl;
 
         stage++;
     }
@@ -281,6 +303,93 @@ int main(int argc, char** argv)
     {
         std::cout << stage << ". IMU" << std::endl;
 
+        const bfs::path imu_csv_path = mulran_root / "sensor_data" / "xsens_imu.csv";
+
+        FILE *fp = fopen(imu_csv_path.string().c_str(), "r");
+        uint64_t stamp;
+        double q_x,q_y,q_z,q_w,x,y,z,g_x,g_y,g_z,a_x,a_y,a_z,m_x,m_y,m_z;
+        sensor_msgs::Imu imu_data;
+        sensor_msgs::MagneticField mag_data;
+
+        std::cout << "- loading " << imu_csv_path << std::endl;
+        long count = 0;
+
+        while(1)
+        {
+            int length = fscanf(fp,
+                "%ld,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf\n",
+                &stamp,&q_x,&q_y,&q_z,&q_w,&x,&y,&z,&g_x,&g_y,&g_z,&a_x,&a_y,&a_z,&m_x,&m_y,&m_z);
+            
+            if(length != 8 && length != 17)
+            {
+                break;
+            }
+
+            ros::Time stamp_ros;
+            stamp_ros.fromNSec(stamp);
+
+            if(stamp_ros < tf_static_stamp)
+            {
+                tf_static_stamp = stamp_ros;
+            }
+
+            if(length >= 8)
+            {
+                // Write IMU data
+                imu_data.header.stamp = stamp_ros;
+                imu_data.header.frame_id = xsens_frame;
+                imu_data.orientation.x = q_x;
+                imu_data.orientation.y = q_y;
+                imu_data.orientation.z = q_z;
+                imu_data.orientation.w = q_w;
+
+                imu_data.orientation_covariance[0] = 3;
+                imu_data.orientation_covariance[4] = 3;
+                imu_data.orientation_covariance[8] = 3;
+
+                if(length >= 14)
+                {
+                    imu_data.angular_velocity.x = g_x;
+                    imu_data.angular_velocity.y = g_y;
+                    imu_data.angular_velocity.z = g_z;
+                    
+                    imu_data.angular_velocity_covariance[0] = 3;
+                    imu_data.angular_velocity_covariance[4] = 3;
+                    imu_data.angular_velocity_covariance[8] = 3;
+                } else {
+                    imu_data.angular_velocity_covariance[0] = -1;
+                }
+
+                if(length >= 17)
+                {
+                    imu_data.linear_acceleration.x = a_x;
+                    imu_data.linear_acceleration.y = a_y;
+                    imu_data.linear_acceleration.z = a_z;
+                    
+                    imu_data.linear_acceleration_covariance[0] = 3;
+                    imu_data.linear_acceleration_covariance[4] = 3;
+                    imu_data.linear_acceleration_covariance[8] = 3;
+                } else {
+                    imu_data.linear_acceleration_covariance[0] = -1;
+                }
+
+                bag.write(xsens_topic, stamp_ros, imu_data);
+            }
+
+            if(length == 17)
+            {
+                // Write magnetometer data
+                mag_data.magnetic_field.x = m_x;
+                mag_data.magnetic_field.y = m_y;
+                mag_data.magnetic_field.z = m_z;
+                bag.write(xsens_mag_topic, stamp_ros, mag_data);
+            }
+        }
+
+        fclose(fp);
+
+        std::cout << "- added " << count << " imu messages" << std::endl;
+
         stage++;
     }
 
@@ -288,25 +397,67 @@ int main(int argc, char** argv)
     {
         std::cout << stage << ". GPS" << std::endl;
 
+        const bfs::path gps_csv_path = mulran_root / "sensor_data" / "gps.csv";
+
+        FILE *fp = fopen(gps_csv_path.string().c_str(), "r");
+        uint64_t stamp;
+        double latitude, longitude, altitude, altitude_orthometric;
+        double cov[9];
+        
+        sensor_msgs::NavSatFix gps_data;
+        long count = 0;
+        std::cout << "- loading " << gps_csv_path << std::endl;
+
+        while( fscanf(fp,"%ld,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf\n",
+                &stamp,&latitude,&longitude,&altitude,&cov[0],&cov[1],&cov[2],&cov[3],&cov[4],&cov[5],&cov[6],&cov[7],&cov[8])
+                == 13)
+        {
+            ros::Time stamp_ros;
+            stamp_ros.fromNSec(stamp);
+            
+            if(stamp_ros < tf_static_stamp)
+            {
+                tf_static_stamp = stamp_ros;
+            }
+            
+            gps_data.header.stamp = stamp_ros;
+            gps_data.header.frame_id = gps_frame;
+            gps_data.latitude = latitude;
+            gps_data.longitude = longitude;
+            gps_data.altitude = altitude;
+
+            for(int i = 0 ; i < 9 ; i ++) 
+            {
+                gps_data.position_covariance[i] = cov[i];
+            }
+
+            bag.write(gps_topic, stamp_ros, gps_data);
+            count++;
+        }
+
+        fclose(fp);
+        
+        std::cout << "- added " << count << " gps messages" << std::endl;
+
         stage++;
     }
 
     if(add_dynamic_tf)
     { // GT
         std::cout << stage << ". DYNAMIC TF (Ground Truth)" << std::endl;
-        const bfs::path gt_csv_path = mulran_root / "/global_pose.csv";
+        const bfs::path gt_csv_path = mulran_root / "global_pose.csv";
         // const std::string gt_csv_path = root_path + std::string("/global_pose.csv");
 
         std::fstream fin;
         fin.open(gt_csv_path.string(), std::ios::in);
         if(fin.is_open())
         {
-            std::cout << "Loading from: " << gt_csv_path << std::endl;
+            std::cout << "- loading " << gt_csv_path << std::endl;
 
             std::string temp;
             int count  = 0;
             
-            while (fin >> temp) 
+            while(fin >> temp) 
             {
                 Eigen::Matrix<double,4,4> T = Eigen::Matrix<double,4,4>::Zero();
                 T(3,3) = 1.0;
@@ -315,7 +466,7 @@ int main(int argc, char** argv)
 
                 std::stringstream ss(temp);
                 std::string str;
-                while (getline(ss, str, ','))
+                while(getline(ss, str, ','))
                 {
                     row.push_back(str);
                 }
@@ -363,7 +514,7 @@ int main(int argc, char** argv)
                 count++;
             }
 
-            std::cout << "- Added " << count << " ground truth poses to TF: '" 
+            std::cout << "- added " << count << " ground truth poses to TF: '" 
                 << base_frame << "' -> '" << gt_frame << "'" <<  std::endl;
         }
         stage++;
@@ -380,14 +531,14 @@ int main(int argc, char** argv)
         geometry_msgs::TransformStamped tf_base_ouster 
             = eigToGeomStamped(Tbase2ouster, tf_static_stamp, base_frame, ouster_frame);
 
-        Eigen::Affine3d Tbase2radar = vectorToAffine3d(
+        Eigen::Affine3d Tbase2navtech = vectorToAffine3d(
             {1.50, -0.04, 1.97, 
             0.0000*M_PI/180.0, 0.0000*M_PI/180.0, 0.9*M_PI/180.0 });
-        geometry_msgs::TransformStamped tf_base_radar 
-            = eigToGeomStamped(Tbase2radar, tf_static_stamp, base_frame, radar_frame);
+        geometry_msgs::TransformStamped tf_base_navtech 
+            = eigToGeomStamped(Tbase2navtech, tf_static_stamp, base_frame, navtech_frame);
         
         tf2_msgs::TFMessage tfmsg;
-        tfmsg.transforms = {tf_base_ouster, tf_base_radar};
+        tfmsg.transforms = {tf_base_ouster, tf_base_navtech};
 
         ros::M_string connection_header = 
         {
