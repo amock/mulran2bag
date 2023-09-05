@@ -89,7 +89,7 @@ bool add_gps = true;
 bool add_dynamic_tf = true;
 bool add_static_tf = true;
 
-// hard code imu covariances
+// hardcode imu covariances
 double imu_orientation_cov[3] = {3.0, 3.0, 3.0};
 double imu_ang_vel_cov[3]     = {3.0, 3.0, 3.0};
 double imu_lin_acc_cov[3]     = {3.0, 3.0, 3.0};
@@ -109,6 +109,6 @@ Data is published on `gps/fix` topic.
 Because the file in the raw data is called `xsens_imu.csv`, I assume that it is an Xsens IMU.
 I do not know what model it is, nor where it is located.
 The data is published in the `ìmu/data_raw` section.
-Warning: 
 As soon as magnetometer data is found, another topic will be created: `ìmu/mag`.
 
+Warning: Covariances are hardcoded, with same default values as [file_player_mulran](https://github.com/irapkaist/file_player_mulran).
