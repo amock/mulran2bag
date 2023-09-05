@@ -103,10 +103,9 @@ int main(int argc, char** argv)
 {
     std::cout << "mulran2bag" << std::endl;
 
-    // Params
+    // Parameters
 
     // Set to tf to see results
-    // std::string gt_pose_topic = "gt_pose";
     std::string gt_frame = "gt";
     std::string base_frame = "base_link";
     
@@ -126,14 +125,10 @@ int main(int argc, char** argv)
     std::string tf_static_topic = "tf_static";
     std::string tf_topic = "tf";
 
-    bool gt_tf = true;
-    bool zero_gt_tf = true;
+    // start ground truth tf at zero
+    bool zero_gt_tf = false;
 
-    int stage = 1;
-
-    bool disable_warnings = true;
-
-    // FOR DEBUGGING
+    // enable parts of export
     bool add_ouster = true;
     bool add_radar = true;
     bool add_imu = true;
@@ -141,6 +136,8 @@ int main(int argc, char** argv)
     bool add_dynamic_tf = true;
     bool add_static_tf = true;
 
+    // enable warning
+    bool disable_warnings = true;
 
     if(argc < 2)
     {
@@ -150,13 +147,39 @@ int main(int argc, char** argv)
 
     // in
     bfs::path mulran_root = argv[1];
-    // std::string root_path = argv[1];
+    std::string bag_name = "out.bag";
+
+    if(argc > 2)
+    {
+        bag_name = argv[2];
+    }
+
+    if(bfs::exists(bag_name))
+    {
+        
+        std::cout << "Override '" << bag_name << "'?: [Yn] ";
+        while(true)
+        {
+            char c = std::cin.get();
+            if(c == '\n' || c == 'Y' || c == 'y')
+            {
+                break;
+                // continue
+            } else if(c == 'n' || c == 'N') {
+                // break
+                std::cout << "EXIT" << std::endl;
+                return 0;
+            }
+        }
+    }
 
     // out
     rosbag::Bag bag;
-    bag.open("out.bag",  rosbag::bagmode::Write);
-    
+    bag.open(bag_name,  rosbag::bagmode::Write);
+
+    int stage = 1;
     ros::Time tf_static_stamp = ros::TIME_MAX;
+
 
     if(add_ouster)
     { // Ouster
@@ -294,7 +317,7 @@ int main(int argc, char** argv)
 
             printProgress("- add radar polar image", progress);
         }
-        std::cout << std:endl;
+        std::cout << std::endl;
 
         stage++;
     }
@@ -536,9 +559,21 @@ int main(int argc, char** argv)
             0.0000*M_PI/180.0, 0.0000*M_PI/180.0, 0.9*M_PI/180.0 });
         geometry_msgs::TransformStamped tf_base_navtech 
             = eigToGeomStamped(Tbase2navtech, tf_static_stamp, base_frame, navtech_frame);
+
+        Eigen::Affine3d Tbase2imu = vectorToAffine3d(
+            {0.0, 0.0, 0.0, 
+            0.0, 0.0, 0.0});
+        geometry_msgs::TransformStamped tf_base_imu 
+            = eigToGeomStamped(Tbase2imu, tf_static_stamp, base_frame, xsens_frame);
+
+        Eigen::Affine3d Tbase2gps = vectorToAffine3d(
+            {0.0, 0.0, 0.0, 
+            0.0, 0.0, 0.0});
+        geometry_msgs::TransformStamped tf_base_gps 
+            = eigToGeomStamped(Tbase2gps, tf_static_stamp, base_frame, gps_frame);
         
         tf2_msgs::TFMessage tfmsg;
-        tfmsg.transforms = {tf_base_ouster, tf_base_navtech};
+        tfmsg.transforms = {tf_base_ouster, tf_base_navtech, tf_base_imu, tf_base_gps};
 
         ros::M_string connection_header = 
         {
