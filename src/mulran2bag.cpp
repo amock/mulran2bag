@@ -126,7 +126,9 @@ int main(int argc, char** argv)
     std::string tf_topic = "tf";
 
     // start ground truth tf at zero
-    bool zero_gt_tf = false;
+    // - disabling this leads to visualization issues
+    //   in RViz because of floating point issues
+    bool zero_gt_tf = true;
 
     // enable parts of export
     bool add_ouster = true;

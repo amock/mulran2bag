@@ -21,7 +21,7 @@ Right now you have to change the code.
 
 ## Transformations
 
-TODO: Image
+![tf tree](dat/tf_tree.png "tf tree")
 
 ## Dynamic Transformations
 
