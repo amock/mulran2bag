@@ -138,6 +138,10 @@ int main(int argc, char** argv)
     bool add_dynamic_tf = true;
     bool add_static_tf = true;
 
+    double imu_orientation_cov[3] = {3.0, 3.0, 3.0};
+    double imu_ang_vel_cov[3]     = {3.0, 3.0, 3.0};
+    double imu_lin_acc_cov[3]     = {3.0, 3.0, 3.0};
+
     // enable warning
     bool disable_warnings = true;
 
@@ -550,6 +554,7 @@ int main(int argc, char** argv)
     if(add_static_tf)
     {
         std::cout << stage << ". STATIC TF" << std::endl;
+    
         Eigen::Affine3d Tbase2ouster = vectorToAffine3d(
             {1.7042, -0.021, 1.8047, 
             0.0001*M_PI/180.0, 0.0003*M_PI/180.0, 179.6654*M_PI/180.0 });
