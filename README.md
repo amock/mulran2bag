@@ -106,7 +106,7 @@ Data is published on `gps/fix` topic.
 
 ### Xsens IMU
 
-Because the file in the raw data is called `xsens_imu.csv`, I assume that it is an Xsens IMU.
+Because the file in the raw data is called `xsens_imu.csv`, I assume that it is a Xsens IMU.
 I do not know what model it is, nor where it is located.
 The data is published in the `ìmu/data_raw` section.
 As soon as magnetometer data is found, another topic will be created: `ìmu/mag`.
