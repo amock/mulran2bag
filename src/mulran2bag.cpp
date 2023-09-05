@@ -202,7 +202,7 @@ int main(int argc, char** argv)
         }
         fin.close();
         
-        std::cout << "- loaded " << stamps.size() << " Ouster stamps" << std::endl;
+        std::cout << "  - loaded " << stamps.size() << " Ouster stamps" << std::endl;
 
         long count = 0;
         for(auto stamp : stamps)
@@ -262,7 +262,7 @@ int main(int argc, char** argv)
 
             double progress = static_cast<double>(count) / static_cast<double>(stamps.size());
 
-            printProgress("- added ouster clouds", progress);
+            printProgress("  - add ouster clouds", progress);
         }
         std::cout << std::endl;
     
@@ -288,7 +288,7 @@ int main(int argc, char** argv)
             }
         }
 
-        std::cout << "- loaded " << stamps.size() << " Navtech stamps" << std::endl;
+        std::cout << "  - loaded " << stamps.size() << " Navtech stamps" << std::endl;
 
         long count = 0;
         for(auto stamp : stamps)
@@ -315,7 +315,7 @@ int main(int argc, char** argv)
 
             double progress = static_cast<double>(count) / static_cast<double>(stamps.size());
 
-            printProgress("- add radar polar image", progress);
+            printProgress("  - add radar polar image", progress);
         }
         std::cout << std::endl;
 
@@ -334,7 +334,7 @@ int main(int argc, char** argv)
         sensor_msgs::Imu imu_data;
         sensor_msgs::MagneticField mag_data;
 
-        std::cout << "- loading " << imu_csv_path << std::endl;
+        std::cout << "  - loading " << imu_csv_path << std::endl;
         long count = 0;
 
         while(1)
@@ -411,7 +411,7 @@ int main(int argc, char** argv)
 
         fclose(fp);
 
-        std::cout << "- added " << count << " imu messages" << std::endl;
+        std::cout << "  - added " << count << " imu messages" << std::endl;
 
         stage++;
     }
@@ -429,7 +429,7 @@ int main(int argc, char** argv)
         
         sensor_msgs::NavSatFix gps_data;
         long count = 0;
-        std::cout << "- loading " << gps_csv_path << std::endl;
+        std::cout << "  - loading " << gps_csv_path << std::endl;
 
         while( fscanf(fp,"%ld,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf\n",
                 &stamp,&latitude,&longitude,&altitude,&cov[0],&cov[1],&cov[2],&cov[3],&cov[4],&cov[5],&cov[6],&cov[7],&cov[8])
@@ -460,7 +460,7 @@ int main(int argc, char** argv)
 
         fclose(fp);
         
-        std::cout << "- added " << count << " gps messages" << std::endl;
+        std::cout << "  - added " << count << " gps messages" << std::endl;
 
         stage++;
     }
@@ -475,7 +475,7 @@ int main(int argc, char** argv)
         fin.open(gt_csv_path.string(), std::ios::in);
         if(fin.is_open())
         {
-            std::cout << "- loading " << gt_csv_path << std::endl;
+            std::cout << "  - loading " << gt_csv_path << std::endl;
 
             std::string temp;
             int count  = 0;
@@ -537,7 +537,7 @@ int main(int argc, char** argv)
                 count++;
             }
 
-            std::cout << "- added " << count << " ground truth poses to TF: '" 
+            std::cout << "  - added " << count << " ground truth poses to TF: '" 
                 << base_frame << "' -> '" << gt_frame << "'" <<  std::endl;
         }
         stage++;
