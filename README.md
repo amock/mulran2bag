@@ -3,6 +3,22 @@
 Pure command line tool that converts MulRan datasets to bag files.
 This implementation is based on [file_player_mulran](https://github.com/irapkaist/file_player_mulran).
 
+![RViz](dat/rviz.gif "RViz")
+
+
+Requirements: 
+
+1. Download MulRan datasets: https://sites.google.com/view/mulran-pr/dataset
+2. Order the downloaded data: https://www.youtube.com/watch?v=uU-FC-GmHXA
+
+After completing these steps, the root folder should contain a `global_pose.csv` and a `sensor_data` folder.
+The path to the root folder can be passed to the `mulran2bag`-Node:
+
+```console
+rosrun mulran2bag mulran2bag path/to/ROOT
+```
+to convert it to a bag-file named `out.bag`.
+
 ## Data
 
 | Sensor                 | Topic           | Message                     |
@@ -12,28 +28,6 @@ This implementation is based on [file_player_mulran](https://github.com/irapkais
 | Xsens IMU              | `ìmu/data_raw`  | `sensor_msgs/Imu`           |
 |                        | `imu/mag`       | `sensor_msgs/MagneticField` |
 | GPS                    | `gps/fix`       | `sensor_msgs/NavSatFix`     |
-
-### Ouster LiDAR
-
-Ouster OS1-64 LiDAR
-
-### Navtech Radar
-
-Navtech Radar CIR204-H
-
-### GPS
-
-I do not know what model it is, nor where it is located.
-Data is published on `gps/fix` topic.
-
-### Xsens IMU
-
-Because the file in the raw data is called `xsens_imu.csv`, I assume that it is an Xsens IMU.
-I do not know what model it is, nor where it is located.
-The data is published in the `ìmu/data_raw` section.
-Warning: 
-As soon as magnetometer data is found, another topic will be created: `ìmu/mag`.
-
 ## Transformations
 
 ![tf tree](dat/tf_tree.png "tf tree")
@@ -102,3 +96,19 @@ double imu_lin_acc_cov[3]     = {3.0, 3.0, 3.0};
 ```
 
 All default values were taken from [file_player_mulran](https://github.com/irapkaist/file_player_mulran).
+
+## Issues
+
+### GPS
+
+I do not know what model it is, nor where it is located.
+Data is published on `gps/fix` topic.
+
+### Xsens IMU
+
+Because the file in the raw data is called `xsens_imu.csv`, I assume that it is an Xsens IMU.
+I do not know what model it is, nor where it is located.
+The data is published in the `ìmu/data_raw` section.
+Warning: 
+As soon as magnetometer data is found, another topic will be created: `ìmu/mag`.
+
