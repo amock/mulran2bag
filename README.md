@@ -15,9 +15,9 @@ After completing these steps, the root folder should contain a `global_pose.csv`
 The path to the root folder can be passed to the `mulran2bag`-Node:
 
 ```console
-rosrun mulran2bag mulran2bag path/to/mulran/root/folder
+rosrun mulran2bag mulran2bag path/to/mulran/root_folder
 ```
-to convert it to a bag-file named `out.bag`.
+to convert it to a bag-file named `root_folder.bag`.
 
 ## Data
 
@@ -113,5 +113,4 @@ The data is published in the `ìmu/data_raw` section.
 As soon as magnetometer data is found, another topic will be created: `ìmu/mag`.
 
 Warning: Covariances are hardcoded, with same default values as [file_player_mulran](https://github.com/irapkaist/file_player_mulran).
-
 

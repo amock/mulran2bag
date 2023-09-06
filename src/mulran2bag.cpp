@@ -153,7 +153,8 @@ int main(int argc, char** argv)
 
     // in
     bfs::path mulran_root = argv[1];
-    std::string bag_name = "out.bag";
+    std::string bag_name = mulran_root.stem().string() + ".bag";
+
 
     if(argc > 2)
     {
@@ -182,6 +183,8 @@ int main(int argc, char** argv)
     // out
     rosbag::Bag bag;
     bag.open(bag_name,  rosbag::bagmode::Write);
+
+    std::cout << "Converting " << mulran_root << " to \"" << bag_name << "\"" << std::endl;
 
     int stage = 1;
     ros::Time tf_static_stamp = ros::TIME_MAX;
