@@ -568,13 +568,13 @@ int main(int argc, char** argv)
             = eigToGeomStamped(Tbase2navtech, tf_static_stamp, base_frame, navtech_frame);
 
         Eigen::Affine3d Tbase2imu = vectorToAffine3d(
-            {0.0, 0.0, 0.0, 
+            {-0.07, 0.0, 1.7, 
             0.0, 0.0, 0.0});
         geometry_msgs::TransformStamped tf_base_imu 
             = eigToGeomStamped(Tbase2imu, tf_static_stamp, base_frame, xsens_frame);
 
         Eigen::Affine3d Tbase2gps = vectorToAffine3d(
-            {0.0, 0.0, 0.0, 
+            {-0.32, 0.0, 1.7, 
             0.0, 0.0, 0.0});
         geometry_msgs::TransformStamped tf_base_gps 
             = eigToGeomStamped(Tbase2gps, tf_static_stamp, base_frame, gps_frame);
