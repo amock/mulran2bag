@@ -42,15 +42,16 @@ Since the `gt` frame is added below `base_link` you can start another localizati
 All static transformations are generated exactly as a static transform broadcaster would do it and are written to the `tf_static`-topic.
 
 Currently implemented **static** transformations:
-- `base_link` to `ouster`
-- `base_link` to `radar_polar`
+- `base_link` to `ouster`: trans = (1.7042 m, -0.021 m, 1.8047 m), rot = (0.0001°, 0.0003°, 179.6654°)
+- `base_link` to `radar_polar`: trans = (1.50 m, -0.04 m, 1.97 m), rot = (0°, 0°, 0.9°)
+- `base_link` to `gps`: trans = (-0.32 m, 0.0 m, 1.7 m), rot = (0°, 0°, 0°)
+- `base_link` to `imu`: trans = (-0.07 m, 0.0 m, 1.7 m), rot = (0°, 0°, 0°)
 
-Currently missing static transformations:
-- `base_link` to `gps` (set to identity)
-- `base_link` to `imu` (set to identity)
-
-Feel free to contact me if you know them.
-I set these missing transformations to identity.
+Figured out, [file_player_mulran](https://github.com/irapkaist/file_player_mulran) referred to another paper "Complex urban dataset with multi-level sensors from highly diverse urban environments", 2019 IRJJ, Jinyong Jeong, for exterinsic calibration of everything that is not mentioned.
+Maybe there are some calibration files hidden in this dataset.
+However, the link to the dataset https://irap.kaist.ac.kr/dataset/ is dead (Sep 6, 2023).
+So I tried to estimate the missing transformations only by the numbers given by the paper.
+Feel free to contact me if you know more accurate calibrations.
 
 ## Customization
 
@@ -112,3 +113,5 @@ The data is published in the `ìmu/data_raw` section.
 As soon as magnetometer data is found, another topic will be created: `ìmu/mag`.
 
 Warning: Covariances are hardcoded, with same default values as [file_player_mulran](https://github.com/irapkaist/file_player_mulran).
+
+
