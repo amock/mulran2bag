@@ -138,9 +138,9 @@ int main(int argc, char** argv)
     bool add_dynamic_tf = true;
     bool add_static_tf = true;
 
-    double imu_orientation_cov[3] = {3.0, 3.0, 3.0};
-    double imu_ang_vel_cov[3]     = {3.0, 3.0, 3.0};
-    double imu_lin_acc_cov[3]     = {3.0, 3.0, 3.0};
+    double imu_orientation_cov[3] = {0.01, 0.02, 0.04};
+    double imu_ang_vel_cov[3]     = {0.002, 0.002, 0.002};
+    double imu_lin_acc_cov[3]     = {0.1, 0.1, 0.1};
 
     // enable warning
     bool disable_warnings = true;
@@ -375,9 +375,9 @@ int main(int argc, char** argv)
                 imu_data.orientation.z = q_z;
                 imu_data.orientation.w = q_w;
 
-                imu_data.orientation_covariance[0] = 3;
-                imu_data.orientation_covariance[4] = 3;
-                imu_data.orientation_covariance[8] = 3;
+                imu_data.orientation_covariance[0] = imu_orientation_cov[0];
+                imu_data.orientation_covariance[4] = imu_orientation_cov[1];
+                imu_data.orientation_covariance[8] = imu_orientation_cov[2];
 
                 if(length >= 14)
                 {
@@ -385,9 +385,9 @@ int main(int argc, char** argv)
                     imu_data.angular_velocity.y = g_y;
                     imu_data.angular_velocity.z = g_z;
                     
-                    imu_data.angular_velocity_covariance[0] = 3;
-                    imu_data.angular_velocity_covariance[4] = 3;
-                    imu_data.angular_velocity_covariance[8] = 3;
+                    imu_data.angular_velocity_covariance[0] = imu_ang_vel_cov[0];
+                    imu_data.angular_velocity_covariance[4] = imu_ang_vel_cov[1];
+                    imu_data.angular_velocity_covariance[8] = imu_ang_vel_cov[2];
                 } else {
                     imu_data.angular_velocity_covariance[0] = -1;
                 }
@@ -398,9 +398,9 @@ int main(int argc, char** argv)
                     imu_data.linear_acceleration.y = a_y;
                     imu_data.linear_acceleration.z = a_z;
                     
-                    imu_data.linear_acceleration_covariance[0] = 3;
-                    imu_data.linear_acceleration_covariance[4] = 3;
-                    imu_data.linear_acceleration_covariance[8] = 3;
+                    imu_data.linear_acceleration_covariance[0] = imu_lin_acc_cov[0];
+                    imu_data.linear_acceleration_covariance[4] = imu_lin_acc_cov[1];
+                    imu_data.linear_acceleration_covariance[8] = imu_lin_acc_cov[2];
                 } else {
                     imu_data.linear_acceleration_covariance[0] = -1;
                 }

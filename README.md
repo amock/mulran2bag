@@ -25,9 +25,12 @@ to convert it to a bag-file named `root_folder.bag`.
 |------------------------|-----------------|-----------------------------|
 | Ouster OS1-64 LiDAR    | `os1_points`    | `sensor_msgs/PointCloud2`   |
 | Navtech Radar CIR204-H | `Navtech/Polar` | `sensor_msgs/Image`         |
-| Xsens IMU              | `ìmu/data_raw`  | `sensor_msgs/Imu`           |
+| Xsens IMU MTi-300 *    | `ìmu/data_raw`  | `sensor_msgs/Imu`           |
 |                        | `imu/mag`       | `sensor_msgs/MagneticField` |
-| GPS                    | `gps/fix`       | `sensor_msgs/NavSatFix`     |
+| GPS U-Blox EVK-7P *    | `gps/fix`       | `sensor_msgs/NavSatFix`     |
+
+\* If it is the same as "Complex urban dataset ...", 2019 IRJJ, Jinyong Jeong
+
 ## Transformations
 
 ![tf tree](dat/tf_tree.png "tf tree")
@@ -91,12 +94,14 @@ bool add_dynamic_tf = true;
 bool add_static_tf = true;
 
 // hardcode imu covariances
-double imu_orientation_cov[3] = {3.0, 3.0, 3.0};
-double imu_ang_vel_cov[3]     = {3.0, 3.0, 3.0};
-double imu_lin_acc_cov[3]     = {3.0, 3.0, 3.0};
+double imu_orientation_cov[3] = {0.01, 0.02, 0.04};
+double imu_ang_vel_cov[3]     = {0.002, 0.002, 0.002};
+double imu_lin_acc_cov[3]     = {0.1, 0.1, 0.1};
 ```
 
 All default values were taken from [file_player_mulran](https://github.com/irapkaist/file_player_mulran).
+
+Update 6 Sep, 23: Replaced all imu covariance defaults with new guesses based on MTi 300 datasheet. TODO: Try if guesses are valid
 
 ## Issues
 
