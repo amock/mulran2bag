@@ -406,6 +406,7 @@ int main(int argc, char** argv)
                 }
 
                 bag.write(xsens_topic, stamp_ros, imu_data);
+                count++;
             }
 
             if(length == 17)
@@ -606,3 +607,4 @@ int main(int argc, char** argv)
 
     return 0;
 }
+
